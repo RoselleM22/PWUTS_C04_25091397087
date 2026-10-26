@@ -1,0 +1,473 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Kost | Pembayaran</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #253047;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 245px;
+            background: #172554;
+            color: white;
+            padding: 28px 18px;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: bold;
+            margin: 0 10px 8px;
+        }
+
+        .brand span {
+            color: #93c5fd;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #cbd5e1;
+            margin: 0 10px 35px;
+        }
+
+        .menu-title {
+            font-size: 11px;
+            color: #94a3b8;
+            margin: 24px 10px 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu a {
+            display: block;
+            text-decoration: none;
+            color: #dbeafe;
+            padding: 13px 12px;
+            margin-bottom: 7px;
+            border-radius: 9px;
+            font-size: 14px;
+        }
+
+        .menu a:hover,
+        .menu a.active {
+            background: #334b82;
+            color: white;
+        }
+
+        .main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .topbar {
+            background: white;
+            padding: 22px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            border-bottom: 1px solid #e8edf5;
+        }
+
+        .topbar h2 {
+            font-size: 20px;
+        }
+
+        .topbar p {
+            font-size: 13px;
+            color: #718096;
+            margin-top: 6px;
+        }
+
+        .profile {
+            background: #e0eaff;
+            color: #1d4ed8;
+            padding: 11px 15px;
+            border-radius: 12px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .content {
+            padding: 30px 32px;
+            max-width: 1250px;
+            margin: auto;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h1 {
+            font-size: 27px;
+            margin-bottom: 9px;
+        }
+
+        .welcome p {
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .card {
+            background: white;
+            padding: 23px;
+            border-radius: 15px;
+            border: 1px solid #e8edf5;
+            box-shadow: 0 4px 15px rgba(30, 50, 90, 0.04);
+        }
+
+        .card-label {
+            color: #718096;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .card-value {
+            font-size: 25px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .card-note {
+            color: #718096;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .pending {
+            background: #fff0cc;
+            color: #956300;
+        }
+
+        .paid {
+            background: #d9fbe8;
+            color: #167447;
+        }
+
+        .section {
+            background: white;
+            padding: 24px;
+            border-radius: 15px;
+            border: 1px solid #e8edf5;
+            margin-bottom: 22px;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section-heading h3 {
+            font-size: 17px;
+        }
+
+        .section-heading p {
+            color: #718096;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 11px 16px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 560px;
+        }
+
+        th, td {
+            padding: 15px 12px;
+            text-align: left;
+            border-bottom: 1px solid #edf0f6;
+            font-size: 13px;
+        }
+
+        th {
+            color: #718096;
+            font-weight: 600;
+            background: #fafbfe;
+        }
+
+        .notice {
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            padding: 18px;
+            color: #1e40af;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        footer {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            padding: 15px;
+        }
+
+        @media (max-width: 850px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .content {
+                padding: 24px 18px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .layout {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 18px;
+            }
+
+            .subtitle {
+                margin-bottom: 18px;
+            }
+
+            .menu {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 7px;
+            }
+
+            .menu-title {
+                margin-top: 15px;
+            }
+
+            .menu a {
+                margin: 0;
+                padding: 10px;
+            }
+
+            .topbar {
+                padding: 18px;
+            }
+
+            .topbar h2 {
+                font-size: 17px;
+            }
+
+            .profile {
+                font-size: 11px;
+                padding: 9px;
+            }
+
+            .welcome h1 {
+                font-size: 23px;
+            }
+
+            .section {
+                padding: 17px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">Kelola<span>Kost.</span></div>
+        <div class="subtitle">Portal Penghuni Kost</div>
+
+        <div class="menu-title">Menu Utama</div>
+
+        <nav class="menu">
+            <a href="index.html" class="active" data-home>⌂ Dashboard</a>
+            <a href="pages/pembayaran.html" data-page="pages/pembayaran.html">▤ Pembayaran</a>
+            <a href="pages/form-pembayaran.html" data-page="pages/form-pembayaran.html">＋ Bayar Kost</a>
+            <a href="riwayat-pembayaran.php">▤ Riwayat Pembayaran</a>
+        </nav>
+
+        <div class="menu-title">Informasi</div>
+        <div style="padding: 10px; color: #cbd5e1; font-size: 12px; line-height: 1.8;">
+            Pantau tagihan dan pembayaran kost kamu dengan mudah.
+        </div>
+    </aside>
+
+    <div class="main">
+        <header class="topbar">
+            <div>
+                <h2>Dashboard Penghuni</h2>
+                <p>Kelola informasi pembayaran kost kamu.</p>
+            </div>
+            <div class="profile">Penghuni Kost</div>
+        </header>
+
+        <main class="content" id="mainContent">
+            <div class="welcome">
+                <h1>Halo, Penghuni! 👋</h1>
+                <p>Selamat datang di Kelola Kost. Cek tagihan dan status pembayaranmu di sini.</p>
+            </div>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="card-label">Tagihan Bulan Ini</div>
+                    <div class="card-value">Rp850.000</div>
+                    <div class="card-note">Contoh nominal sewa bulanan</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-label">Status Pembayaran</div>
+                    <div class="card-value">
+                        <span class="status pending">Belum Dibayar</span>
+                    </div>
+                    <div class="card-note">Segera lakukan pembayaran sesuai tagihan.</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-label">Jatuh Tempo</div>
+                    <div class="card-value">Tanggal 5</div>
+                    <div class="card-note">Contoh batas pembayaran setiap bulan</div>
+                </div>
+            </div>
+
+            <section class="section">
+                <div class="section-heading">
+                    <div>
+                        <h3>Ringkasan Tagihan</h3>
+                        <p>Contoh data pembayaran penghuni.</p>
+                    </div>
+                    <a class="btn" href="pages/form-pembayaran.html"
+                       data-page="pages/form-pembayaran.html">
+                        + Bayar Sekarang
+                    </a>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Periode</th>
+                                <th>Jenis Tagihan</th>
+                                <th>Nominal</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Oktober 2026</td>
+                                <td>Sewa Kost</td>
+                                <td>Rp850.000</td>
+                                <td><span class="status pending">Belum Dibayar</span></td>
+                            </tr>
+                            <tr>
+                                <td>September 2026</td>
+                                <td>Sewa Kost</td>
+                                <td>Rp850.000</td>
+                                <td><span class="status paid">Lunas</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="notice">
+                <strong>Informasi Pembayaran</strong><br>
+                Pastikan nominal dan periode tagihan sudah benar sebelum mengisi formulir pembayaran.
+                Data yang tampil saat ini adalah data contoh untuk demonstrasi website.
+            </div>
+        </main>
+
+        <footer>
+            &copy; 2026 Kelola Kost | Website UTS Pemrograman Web
+        </footer>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).on("click", "[data-page]", function (event) {
+        event.preventDefault();
+
+        const page = $(this).attr("data-page");
+
+        $("#mainContent").html("<p>Memuat halaman...</p>");
+
+        $("#mainContent").load(page, function (response, status) {
+            if (status === "error") {
+                $("#mainContent").html(
+                    "<div class='notice'>" +
+                    "<strong>Halaman belum tersedia.</strong><br>" +
+                    "File halaman ini akan kita buat pada langkah berikutnya." +
+                    "</div>"
+                );
+            }
+        });
+
+        $(".menu a").removeClass("active");
+        $(this).addClass("active");
+    });
+
+    $(document).on("click", "[data-home]", function (event) {
+        event.preventDefault();
+        window.location.href = "index.html";
+    });
+</script>
+</body>
+</html>

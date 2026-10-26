@@ -1,0 +1,330 @@
+
+<section class="welcome">
+    <h1>Formulir Pembayaran Kost</h1>
+    <p>Lengkapi informasi berikut untuk mengajukan pembayaran kost.</p>
+</section>
+
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <h3>Detail Pembayaran</h3>
+            <p>Tagihan diambil langsung dari database.</p>
+        </div>
+    </div>
+
+    <form id="formPembayaran" enctype="multipart/form-data">
+        <div class="form-grid">
+            <div class="form-group full">
+                <label for="id_tagihan">Pilih Tagihan</label>
+                <select id="id_tagihan" name="id_tagihan" required>
+                    <option value="">Memuat tagihan...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="nama">Nama Penghuni</label>
+                <input type="text" id="nama" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="periode">Periode Tagihan</label>
+                <input type="text" id="periode" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="nominal">Nominal Tagihan (Rp)</label>
+                <input type="text" id="nominal" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="jatuhTempo">Tanggal Jatuh Tempo</label>
+                <input type="text" id="jatuhTempo" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="tanggal">Tanggal Pembayaran</label>
+                <input type="date" id="tanggal" name="tanggal" required>
+            </div>
+
+            <div class="form-group">
+                <label for="metode">Metode Pembayaran</label>
+                <select id="metode" name="metode" required>
+                    <option value="">Pilih metode</option>
+                    <option value="Transfer Bank">Transfer Bank</option>
+                    <option value="E-Wallet">E-Wallet</option>
+                    <option value="Tunai">Tunai</option>
+                </select>
+            </div>
+
+            <div class="form-group full">
+                <label for="bukti">Bukti Pembayaran</label>
+                <input type="file" id="bukti" name="bukti"
+                       accept=".jpg,.jpeg,.png,.webp" required>
+                <small>Format JPG, PNG, atau WebP, maksimal 2 MB.</small>
+            </div>
+        </div>
+
+        <div id="pesanForm" role="status" aria-live="polite"></div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px;">
+            <button type="submit" class="btn">Kirim Pembayaran</button>
+            <button type="reset" class="btn"
+                    style="background:#64748b;">Reset Form</button>
+        </div>
+    </form>
+</section>
+
+<style>
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d8deea;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    background: white;
+}
+
+.form-group input[readonly] {
+    background: #f1f5f9;
+}
+
+.form-group small {
+    color: #718096;
+    font-size: 12px;
+}
+
+#pesanForm {
+    margin-top: 18px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+#pesanForm:empty {
+    display: none;
+}
+
+#pesanForm.berhasil,
+#pesanForm.gagal {
+    padding: 12px;
+    border-radius: 8px;
+}
+
+#pesanForm.berhasil {
+    background: #d9fbe8;
+    color: #166534;
+}
+
+#pesanForm.gagal {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+@media (max-width: 600px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: auto;
+    }
+}
+</style>
+
+<script>
+(function () {
+    const form = document.getElementById("formPembayaran");
+    if (!form || form.dataset.terpasang === "ya") return;
+    form.dataset.terpasang = "ya";
+
+    const pilih = document.getElementById("id_tagihan");
+    const nama = document.getElementById("nama");
+    const periode = document.getElementById("periode");
+    const nominal = document.getElementById("nominal");
+    const jatuhTempo = document.getElementById("jatuhTempo");
+    const tanggal = document.getElementById("tanggal");
+    const bukti = document.getElementById("bukti");
+    const pesan = document.getElementById("pesanForm");
+    const tombol = form.querySelector('[type="submit"]');
+
+    const hariIni = new Date();
+    const offset = hariIni.getTimezoneOffset() * 60000;
+    tanggal.max = new Date(hariIni - offset)
+        .toISOString().slice(0, 10);
+
+    let tagihanTersedia = [];
+
+    function tampilkanPesan(teks, jenis) {
+        pesan.className = jenis;
+        pesan.textContent = teks;
+    }
+
+    function formatRupiah(angka) {
+        return new Intl.NumberFormat("id-ID").format(angka);
+    }
+
+    function kosongkanDetail() {
+        nama.value = "";
+        periode.value = "";
+        nominal.value = "";
+        jatuhTempo.value = "";
+    }
+
+    async function muatTagihan() {
+        pilih.innerHTML = '<option value="">Memuat tagihan...</option>';
+
+        try {
+            const respons = await fetch("daftar-tagihan.php");
+            const hasil = await respons.json();
+
+            if (!respons.ok || !hasil.success) {
+                throw new Error("Gagal mengambil data tagihan.");
+            }
+
+            tagihanTersedia = hasil.data;
+
+            pilih.innerHTML = "";
+
+            if (tagihanTersedia.length === 0) {
+                pilih.add(new Option("Tidak ada tagihan yang tersedia", ""));
+                kosongkanDetail();
+                return;
+            }
+
+            pilih.add(new Option("Pilih tagihan", ""));
+
+            tagihanTersedia.forEach(function (item) {
+                pilih.add(new Option(
+                    item.periode + " - Rp" +
+                    formatRupiah(item.jumlah_tagihan),
+                    item.id_tagihan
+                ));
+            });
+
+        } catch (error) {
+            pilih.innerHTML = '<option value="">Gagal memuat tagihan</option>';
+            tampilkanPesan(
+                "Data tagihan gagal dimuat. Periksa koneksi PHP.",
+                "gagal"
+            );
+        }
+    }
+
+    pilih.addEventListener("change", function () {
+        const item = tagihanTersedia.find(
+            t => String(t.id_tagihan) === pilih.value
+        );
+
+        if (!item) {
+            kosongkanDetail();
+            return;
+        }
+
+        nama.value = item.nama_penghuni;
+        periode.value = item.periode;
+        nominal.value = "Rp" + formatRupiah(item.jumlah_tagihan);
+        jatuhTempo.value = item.tanggal_jatuh_tempo;
+    });
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        pesan.className = "";
+        pesan.textContent = "";
+
+        if (!form.reportValidity()) return;
+
+        const item = tagihanTersedia.find(
+            t => String(t.id_tagihan) === pilih.value
+        );
+
+        if (!item) {
+            tampilkanPesan("Pilih tagihan yang tersedia.", "gagal");
+            return;
+        }
+
+        const file = bukti.files[0];
+
+        if (!file || file.size > 2 * 1024 * 1024) {
+            tampilkanPesan(
+                "Pilih bukti pembayaran dengan ukuran maksimal 2 MB.",
+                "gagal"
+            );
+            return;
+        }
+
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+            tampilkanPesan(
+                "Bukti harus berupa gambar JPG, PNG, atau WebP.",
+                "gagal"
+            );
+            return;
+        }
+
+        tombol.disabled = true;
+        tombol.textContent = "Mengirim...";
+
+        try {
+            const data = new FormData(form);
+            const respons = await fetch("simpan-pembayaran.php", {
+                method: "POST",
+                body: data
+            });
+
+            const hasil = await respons.json();
+
+            if (!respons.ok || !hasil.success) {
+                throw new Error(
+                    hasil.message || "Pembayaran gagal disimpan."
+                );
+            }
+
+            tampilkanPesan(hasil.message, "berhasil");
+            form.reset();
+            kosongkanDetail();
+            await muatTagihan();
+
+        } catch (error) {
+            tampilkanPesan(
+                error.message || "Terjadi kesalahan saat mengirim pembayaran.",
+                "gagal"
+            );
+        } finally {
+            tombol.disabled = false;
+            tombol.textContent = "Kirim Pembayaran";
+        }
+    });
+
+    form.addEventListener("reset", function () {
+        pesan.className = "";
+        pesan.textContent = "";
+        kosongkanDetail();
+    });
+
+    muatTagihan();
+})();
+</script>

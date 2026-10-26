@@ -1,0 +1,88 @@
+
+<section class="welcome">
+    <h1>Riwayat Pembayaran</h1>
+    <p>Periksa tagihan dan riwayat pembayaran kost kamu.</p>
+</section>
+
+<section class="cards">
+    <div class="card">
+        <div class="card-label">Total Tagihan</div>
+        <div class="card-value">Rp850.000</div>
+        <div class="card-note">Tagihan Oktober 2026</div>
+    </div>
+
+    <div class="card">
+        <div class="card-label">Status Tagihan</div>
+        <div class="card-value">
+            <span class="status pending">Belum Dibayar</span>
+        </div>
+        <div class="card-note">Segera lakukan pembayaran.</div>
+    </div>
+
+    <div class="card">
+        <div class="card-label">Pembayaran Terakhir</div>
+        <div class="card-value">Rp850.000</div>
+        <div class="card-note">September 2026</div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <h3>Riwayat Pembayaran</h3>
+            <p>Data contoh pembayaran kost.</p>
+        </div>
+        <select id="filterStatus" style="padding:10px;border:1px solid #ddd;border-radius:8px;">
+            <option value="semua">Semua Status</option>
+            <option value="lunas">Lunas</option>
+            <option value="belum">Belum Dibayar</option>
+        </select>
+    </div>
+
+    <div class="table-wrap">
+        <table id="tabelPembayaran">
+            <thead>
+                <tr>
+                    <th>Periode</th>
+                    <th>Jenis Tagihan</th>
+                    <th>Nominal</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-status="belum">
+                    <td>Oktober 2026</td>
+                    <td>Sewa Kost</td>
+                    <td>Rp850.000</td>
+                    <td><span class="status pending">Belum Dibayar</span></td>
+                </tr>
+                <tr data-status="lunas">
+                    <td>September 2026</td>
+                    <td>Sewa Kost</td>
+                    <td>Rp850.000</td>
+                    <td><span class="status paid">Lunas</span></td>
+                </tr>
+                <tr data-status="lunas">
+                    <td>Agustus 2026</td>
+                    <td>Sewa Kost</td>
+                    <td>Rp850.000</td>
+                    <td><span class="status paid">Lunas</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+    $("#filterStatus").on("change", function () {
+        const status = $(this).val();
+
+        $("#tabelPembayaran tbody tr").each(function () {
+            if (status === "semua" || $(this).data("status") === status) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+</script>
